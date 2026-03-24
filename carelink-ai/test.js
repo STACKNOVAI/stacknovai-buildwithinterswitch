@@ -1,5 +1,5 @@
 require("dotenv").config();
-const { analyzeSymptoms } = require("./index");
+const { analyzeSymptoms } = require("./utils/analyzesymptoms");
 
 const testCases = [
   "I have been having chest pain and difficulty breathing since this morning",

@@ -1,38 +1,42 @@
+const express = require("express");
+const app = express();
 require("dotenv").config();
-const Groq = require("groq-sdk");
-const systemPrompt = require("./prompt");
+const http = require("http");
+const { Server } = require("socket.io");
 
-const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
+const connectDB = require("./database/db.config");
+const patientRouter = require("./routes/patient.route");
+const cors = require("cors");
 
-async function analyzeSymptoms(userInput) {
-  if (!userInput || userInput.trim() === "") {
-    return {
-      symptoms: [],
-      duration: "unknown",
-      severity: "unknown",
-      urgency_level: "low",
-      recommended_specialty: "general medicine",
-    };
-  }
+const server = http.createServer(app);
+const io = new Server(server, { cors: { origin: "*" } });
 
-  const response = await groq.chat.completions.create({
-    model: "llama-3.3-70b-versatile",
-    messages: [
-      { role: "system", content: systemPrompt },
-      { role: "user", content: userInput },
-    ],
-    temperature: 0.3,
+app.use(cors({ origin: "*" }));
+app.use(express.json());
+
+app.use("/patient", patientRouter);
+
+connectDB();
+
+const port = 7050;
+
+io.on("connection", (socket) => {
+  console.log("User connected:", socket.id);
+
+  socket.on("join_consultation", (consultationId) => {
+    socket.join(consultationId);
+    console.log(`User joined consultation: ${consultationId}`);
   });
 
-  const raw = response.choices[0].message.content.trim();
+  socket.on("send_message", ({ consultationId, message }) => {
+    io.to(consultationId).emit("new_message", message);
+  });
 
-  try {
-    const parsed = JSON.parse(raw);
-    return parsed;
-  } catch (err) {
-    console.error("JSON parse failed:", raw);
-    throw new Error("AI returned invalid JSON");
-  }
-}
+  socket.on("disconnect", () => {
+    console.log("User disconnected:", socket.id);
+  });
+});
 
-module.exports = { analyzeSymptoms };
+server.listen(port, () => {
+  console.log(`CareLink server running on port ${port}`);
+});
