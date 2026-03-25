@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-
+import AINurse from './AiNurse.jsx'
 const css = `
   * {
     margin: 0;
@@ -1032,49 +1032,15 @@ function Home() {
       </nav>
 
       {/* AI Nurse Modal */}
-      {showModal && (
-        <>
-          <div className="modal-overlay" onClick={handleBackdropClick}></div>
-          <div className="modal-sheet">
-            <div className="modal-handle"></div>
-            <div className="modal-content">
-              <h2 className="modal-title">CareLink AI Nurse</h2>
-              <p className="modal-subtitle">Tell us what you are feeling</p>
-
-              <button className="mic-button">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <path d="M12 2a3 3 0 00-3 3v7a3 3 0 006 0V5a3 3 0 00-3-3z"/>
-                  <path d="M19 10v2a7 7 0 01-14 0v-2"/>
-                  <line x1="12" y1="19" x2="12" y2="22"/>
-                </svg>
-              </button>
-
-              <div className="listening-indicator">
-                <span className="listening-dot"></span>
-                <span className="listening-text">LISTENING...</span>
-              </div>
-
-              <div className="symptoms-area">
-                <div className="symptoms-label">Detected Symptoms</div>
-                <div className="symptom-chips">
-                  <span className="symptom-chip">Persistent headache...</span>
-                  <span className="symptom-chip">Nausea...</span>
-                  <span className="symptom-chip">Started 2 days ago</span>
-                </div>
-              </div>
-
-              <button className="btn-proceed">
-                Proceed to Doctor
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <path d="M5 12h14M12 5l7 7-7 7"/>
-                </svg>
-              </button>
-
-              <p className="modal-note">Your AI Nurse analysis will be shared securely</p>
-            </div>
-          </div>
-        </>
-      )}
+    {showModal && (
+  <AINurse
+    onClose={() => setShowModal(false)}
+    onProceed={(result) => {
+      console.log("Proceeding to doctor with:", result);
+      setShowModal(false);
+    }}
+  />
+)}
     </div>
   )
 }
