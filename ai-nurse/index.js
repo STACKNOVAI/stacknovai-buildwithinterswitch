@@ -5,7 +5,6 @@ const systemPrompt = require("./prompt");
 const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
 
 async function analyzeSymptoms(userInput) {
-  // handle empty input immediately
   if (!userInput || userInput.trim() === "") {
     return {
       symptoms: [],
@@ -15,6 +14,7 @@ async function analyzeSymptoms(userInput) {
       recommended_specialty: "general medicine",
       follow_up_question: null,
       summary: "No symptoms provided. Patient should describe their condition.",
+      advice: "Please describe what you are feeling so we can help you better.",
     };
   }
 
@@ -29,8 +29,14 @@ async function analyzeSymptoms(userInput) {
 
   const raw = response.choices[0].message.content.trim();
 
-  // check if AI returned a follow-up question instead of JSON
-  const isFollowUp = !raw.startsWith("{");
+  // strip markdown code blocks if model wraps response anyway
+  const cleaned = raw
+    .replace(/^```json\s*/i, "")
+    .replace(/^```\s*/i, "")
+    .replace(/```$/i, "")
+    .trim();
+
+  const isFollowUp = !cleaned.startsWith("{");
 
   if (isFollowUp) {
     return {
@@ -39,21 +45,32 @@ async function analyzeSymptoms(userInput) {
       severity: "unknown",
       urgency_level: "low",
       recommended_specialty: "general medicine",
-      follow_up_question: raw,
+      follow_up_question: cleaned,
       summary: "More information needed from patient.",
+      advice: "Please answer the question above so we can assess your condition.",
     };
   }
 
   try {
-    const parsed = JSON.parse(raw);
-    return parsed;
+    const parsed = JSON.parse(cleaned);
+
+    // sanitize and guarantee all fields exist
+    return {
+      symptoms: Array.isArray(parsed.symptoms) ? parsed.symptoms : [],
+      duration: parsed.duration || "unknown",
+      severity: parsed.severity || "unknown",
+      urgency_level: parsed.urgency_level || "low",
+      recommended_specialty: parsed.recommended_specialty || "general medicine",
+      follow_up_question: parsed.follow_up_question || null,
+      summary: parsed.summary || "",
+      advice: parsed.advice || "",
+    };
   } catch (err) {
-    console.error("JSON parse failed:", raw);
+    console.error("JSON parse failed:", cleaned);
     throw new Error("AI returned invalid JSON");
   }
 }
 
-// follow-up conversation handler
 async function continueConversation(originalInput, followUpAnswer) {
   const combinedInput = `
 Original complaint: ${originalInput}
