@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom"; // Added useNavigate
 
 const css = `
   @import url('https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=DM+Sans:wght@400;500;600;700&display=swap');
@@ -368,7 +369,7 @@ const DOCTORS = [
     exp: "12 yrs",
     wait: "2 mins",
     rating: "4.8",
-    price: "$45",
+    price: "₦70,000",
     img: "https://images.unsplash.com/photo-1537368910025-700350fe46c7?w=200&q=80&fit=crop&crop=faces",
     online: true,
   },
@@ -379,7 +380,7 @@ const DOCTORS = [
     exp: "8 yrs",
     wait: "5 mins",
     rating: "4.9",
-    price: "$38",
+    price: "₦60,000",
     img: "https://images.unsplash.com/photo-1594824476967-48c8b964273f?w=200&q=80&fit=crop&crop=faces",
     online: true,
   },
@@ -390,7 +391,7 @@ const DOCTORS = [
     exp: "15 yrs",
     wait: "10 mins",
     rating: "4.7",
-    price: "$65",
+    price: "₦100,000",
     img: "https://images.unsplash.com/photo-1622253692010-333f2da6031d?w=200&q=80&fit=crop&crop=faces",
     online: true,
   },
@@ -401,8 +402,8 @@ const DOCTORS = [
     exp: "10 yrs",
     wait: "8 mins",
     rating: "4.9",
-    price: "$70",
-    img: "https://images.unsplash.com/photo-1559839734-2b71ea197ec2?w=200&q=80&fit=crop&crop=faces",
+    price: "₦110,000",
+    img: "https://images.unsplash.com/photo-1559839734-2b71f1536783?w=200&q=80&fit=crop&crop=faces",
     online: true,
   },
   {
@@ -412,7 +413,7 @@ const DOCTORS = [
     exp: "7 yrs",
     wait: "3 mins",
     rating: "4.6",
-    price: "$50",
+    price: "₦80,000",
     img: "https://images.unsplash.com/photo-1612349317150-e413f6a5b16d?w=200&q=80&fit=crop&crop=faces",
     online: false,
   },
@@ -423,7 +424,7 @@ const DOCTORS = [
     exp: "9 yrs",
     wait: "15 mins",
     rating: "4.8",
-    price: "$60",
+    price: "₦95,000",
     img: "https://images.unsplash.com/photo-1651008376811-b90baee60c1f?w=200&q=80&fit=crop&crop=faces",
     online: true,
   },
@@ -434,7 +435,7 @@ const DOCTORS = [
     exp: "11 yrs",
     wait: "6 mins",
     rating: "4.7",
-    price: "$55",
+    price: "₦85,000",
     img: "https://images.unsplash.com/photo-1582750433449-648ed127bb54?w=200&q=80&fit=crop&crop=faces",
     online: true,
   },
@@ -445,13 +446,14 @@ const DOCTORS = [
     exp: "13 yrs",
     wait: "4 mins",
     rating: "4.9",
-    price: "$62",
+    price: "₦98,000",
     img: "https://images.unsplash.com/photo-1527613426441-4da17471b66d?w=200&q=80&fit=crop&crop=faces",
     online: true,
   },
 ];
 
-export default function FindDoctor({ aiResult, onBack, onConsult }) {
+export default function FindDoctor({ aiResult, onConsult }) {
+  const navigate = useNavigate(); // Initialize navigate
   const [search, setSearch] = useState("");
   const [activeSpec, setActiveSpec] = useState(
     aiResult?.recommended_specialty
@@ -478,7 +480,7 @@ export default function FindDoctor({ aiResult, onBack, onConsult }) {
 
         {/* HEADER */}
         <div className="fd-header">
-          <button className="fd-back" onClick={onBack}>
+          <button className="fd-back" onClick={() => navigate("/dashboard")}>
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
               <path d="M19 12H5M12 5l-7 7 7 7"/>
             </svg>

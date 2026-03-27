@@ -576,7 +576,7 @@ function LandingPage() {
               </div>
               <div className="doctor-footer">
                 <div className="doctor-price">
-                  From <strong>$45</strong>/session
+                  From <strong>₦70,000</strong>/session
                 </div>
                 <button className="btn-book">Book Now</button>
               </div>
@@ -609,7 +609,7 @@ function LandingPage() {
               </div>
               <div className="doctor-footer">
                 <div className="doctor-price">
-                  From <strong>$50</strong>/session
+                  From <strong>₦80,000</strong>/session
                 </div>
                 <button className="btn-book">Book Now</button>
               </div>
@@ -642,7 +642,7 @@ function LandingPage() {
               </div>
               <div className="doctor-footer">
                 <div className="doctor-price">
-                  From <strong>$35</strong>/session
+                  From <strong>₦55,000</strong>/session
                 </div>
                 <button className="btn-book">Book Now</button>
               </div>

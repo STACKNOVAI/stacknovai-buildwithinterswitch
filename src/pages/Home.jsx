@@ -1,8 +1,10 @@
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import AINurse from "./AiNurse.jsx";
 import "./Home.css";
 
-function Home() {
+function Home({ onProceedToDoctor }) {
+  const navigate = useNavigate();
   const [showModal, setShowModal] = useState(false);
   const [activeNav, setActiveNav] = useState("home");
 
@@ -13,15 +15,9 @@ function Home() {
       document.body.style.overflow = "";
     }
     return () => {
-      document.body.style.overflow =   "";
+      document.body.style.overflow = "";
     };
   }, [showModal]);
-
-  const handleBackdropClick = (e) => {
-    if (e.target === e.currentTarget) {
-      setShowModal(false);
-    }
-  };
 
   return (
     <div className="home-page">
@@ -29,59 +25,51 @@ function Home() {
       <aside className="sidebar">
         <div className="sidebar-logo">CareLink</div>
         <nav className="sidebar-nav">
-          <button className="sidebar-item active">
-            <svg
-              width="20"
-              height="20"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-            >
+          <button className="sidebar-item active" onClick={() => navigate("/dashboard")}>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
               <path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z" />
               <polyline points="9 22 9 12 15 12 15 22" />
             </svg>
             Home
           </button>
-          <button className="sidebar-item">
-            <svg
-              width="20"
-              height="20"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-            >
+          <button className="sidebar-item" onClick={() => navigate("/conversations")}>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
               <path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z" />
             </svg>
             Chats
           </button>
-          <button className="sidebar-item">
-            <svg
-              width="20"
-              height="20"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-            >
+          <button className="sidebar-item" onClick={() => navigate("/medications")}>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <path d="M10.5 20.5L3.5 13.5C1.5 11.5 1.5 8 3.5 6C5.5 4 9 4 11 6L18 13C20 15 20 18.5 18 20.5C16 22.5 12.5 22.5 10.5 20.5Z" />
+              <path d="M7 10l7 7" />
+            </svg>
+            Medications
+          </button>
+          <button className="sidebar-item" onClick={() => navigate("/doctors")}>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
               <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2" />
               <circle cx="12" cy="7" r="4" />
             </svg>
+            My Doctors
+          </button>
+          <button className="sidebar-item" onClick={() => navigate("/bookings")}>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
+              <line x1="16" y1="2" x2="16" y2="6" />
+              <line x1="8" y1="2" x2="8" y2="6" />
+              <line x1="3" y1="10" x2="21" y2="10" />
+            </svg>
+            Bookings
+          </button>
+          <button className="sidebar-item" onClick={() => navigate("/profile")}>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <circle cx="12" cy="8" r="4" />
+              <path d="M4 20c0-4 3.6-7 8-7s8 3 8 7" />
+            </svg>
             Profile
           </button>
-          <button
-            className="sidebar-item ai-nurse"
-            onClick={() => setShowModal(true)}
-          >
-            <svg
-              width="20"
-              height="20"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-            >
+          <button className="sidebar-item ai-nurse" onClick={() => setShowModal(true)}>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
               <path d="M12 2a3 3 0 00-3 3v7a3 3 0 006 0V5a3 3 0 00-3-3z" />
               <path d="M19 10v2a7 7 0 01-14 0v-2" />
               <line x1="12" y1="19" x2="12" y2="22" />
@@ -108,7 +96,7 @@ function Home() {
         <section className="section">
           <div className="section-header">
             <h2 className="section-title">Health Talk Feed</h2>
-            <a className="section-link">View all</a>
+            <span className="section-link">View all</span>
           </div>
           <div className="health-talk-grid">
             <div className="health-talk-card">
@@ -119,17 +107,11 @@ function Home() {
               />
               <div className="doctor-name-row">
                 <span className="doctor-name">Dr. Smith</span>
-                <svg
-                  className="verified-icon"
-                  viewBox="0 0 24 24"
-                  fill="currentColor"
-                >
+                <svg className="verified-icon" viewBox="0 0 24 24" fill="currentColor">
                   <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
               </div>
-              <p className="doctor-quote">
-                "Hydration is key to kidney health."
-              </p>
+              <p className="doctor-quote">"Hydration is key to kidney health."</p>
               <button className="btn-read-more">Read more</button>
             </div>
             <div className="health-talk-card">
@@ -140,17 +122,11 @@ function Home() {
               />
               <div className="doctor-name-row">
                 <span className="doctor-name">Dr. Sarah</span>
-                <svg
-                  className="verified-icon"
-                  viewBox="0 0 24 24"
-                  fill="currentColor"
-                >
+                <svg className="verified-icon" viewBox="0 0 24 24" fill="currentColor">
                   <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
               </div>
-              <p className="doctor-quote">
-                "15 min walking reduces daily stress."
-              </p>
+              <p className="doctor-quote">"15 min walking reduces daily stress."</p>
               <button className="btn-read-more">Read more</button>
             </div>
             <div className="health-talk-card">
@@ -161,17 +137,11 @@ function Home() {
               />
               <div className="doctor-name-row">
                 <span className="doctor-name">Dr. Chen</span>
-                <svg
-                  className="verified-icon"
-                  viewBox="0 0 24 24"
-                  fill="currentColor"
-                >
+                <svg className="verified-icon" viewBox="0 0 24 24" fill="currentColor">
                   <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
               </div>
-              <p className="doctor-quote">
-                "Sleep 7-8 hours for heart health."
-              </p>
+              <p className="doctor-quote">"Sleep 7-8 hours for heart health."</p>
               <button className="btn-read-more">Read more</button>
             </div>
           </div>
@@ -181,28 +151,19 @@ function Home() {
         <section className="section">
           <div className="section-header">
             <h2 className="section-title">My Medications</h2>
-            <a className="section-link">Track</a>
+            <span className="section-link" onClick={() => navigate("/medications")}>Track →</span>
           </div>
           <div className="medication-card">
             <div className="medication-content">
               <div className="medication-icon">
-                <svg
-                  width="28"
-                  height="28"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                >
+                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                   <path d="M10.5 20.5L3.5 13.5C1.5 11.5 1.5 8 3.5 6C5.5 4 9 4 11 6L18 13C20 15 20 18.5 18 20.5C16 22.5 12.5 22.5 10.5 20.5Z" />
                   <path d="M7 10l7 7" />
                 </svg>
               </div>
               <div className="medication-info">
                 <div className="medication-name">Lisinopril</div>
-                <div className="medication-dosage">
-                  10mg • Daily after breakfast
-                </div>
+                <div className="medication-dosage">10mg • Daily after breakfast</div>
               </div>
               <div className="medication-time">
                 <div className="medication-time-value">08:00 AM</div>
@@ -219,7 +180,7 @@ function Home() {
         <section className="section">
           <div className="section-header">
             <h2 className="section-title">My Doctors</h2>
-            <a className="section-link">Bookings</a>
+            <span className="section-link" onClick={() => navigate("/bookings")}>Bookings →</span>
           </div>
           <div className="doctor-card">
             <img
@@ -229,11 +190,11 @@ function Home() {
             />
             <div className="doctor-card-info">
               <div className="doctor-card-name">Dr. Robert Chen</div>
-              <div className="doctor-card-specialty">
-                Cardiologist • City Hospital
-              </div>
+              <div className="doctor-card-specialty">Cardiologist • City Hospital</div>
             </div>
-            <button className="btn-consult">Consult</button>
+            <button className="btn-consult" onClick={() => navigate("/conversations")}>
+              Consult
+            </button>
           </div>
         </section>
       </main>
@@ -242,29 +203,16 @@ function Home() {
       <nav className="bottom-nav">
         <button
           className={`nav-item ${activeNav === "chats" ? "active" : ""}`}
-          onClick={() => setActiveNav("chats")}
+          onClick={() => { setActiveNav("chats"); navigate("/conversations"); }}
         >
-          <svg
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-          >
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
             <path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z" />
           </svg>
           <span>Chats</span>
         </button>
         <div className="ai-nurse-btn">
-          <button
-            className="ai-nurse-circle"
-            onClick={() => setShowModal(true)}
-          >
-            <svg
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-            >
+          <button className="ai-nurse-circle" onClick={() => setShowModal(true)}>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
               <path d="M12 2a3 3 0 00-3 3v7a3 3 0 006 0V5a3 3 0 00-3-3z" />
               <path d="M19 10v2a7 7 0 01-14 0v-2" />
               <line x1="12" y1="19" x2="12" y2="22" />
@@ -274,14 +222,9 @@ function Home() {
         </div>
         <button
           className={`nav-item ${activeNav === "profile" ? "active" : ""}`}
-          onClick={() => setActiveNav("profile")}
+          onClick={() => { setActiveNav("profile"); navigate("/profile"); }}
         >
-          <svg
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-          >
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
             <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2" />
             <circle cx="12" cy="7" r="4" />
           </svg>
@@ -295,7 +238,7 @@ function Home() {
           onClose={() => setShowModal(false)}
           onProceed={(result) => {
             setShowModal(false);
-            onProceedToDoctor?.(result);
+            onProceedToDoctor?.(result, navigate);
           }}
         />
       )}
