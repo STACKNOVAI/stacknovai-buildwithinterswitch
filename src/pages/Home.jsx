@@ -13,7 +13,7 @@ function Home() {
       document.body.style.overflow = "";
     }
     return () => {
-      document.body.style.overflow = "";
+      document.body.style.overflow =   "";
     };
   }, [showModal]);
 
