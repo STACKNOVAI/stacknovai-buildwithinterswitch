@@ -1,882 +1,87 @@
-import { useState, useEffect } from 'react'
-import AINurse from './AiNurse.jsx'
-const css = `
-  * {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-  }
-
-  html, body {
-    overflow-x: hidden;
-  }
-
-  body {
-    font-family: 'DM Sans', sans-serif;
-    background: #F5F5F5;
-    color: #0A1628;
-    -webkit-overflow-scrolling: touch;
-  }
-
-  .home-page {
-    min-height: 100vh;
-    max-width: 430px;
-    margin: 0 auto;
-    padding-bottom: 90px;
-    background: #F5F5F5;
-    overflow-x: hidden;
-  }
-
-  /* Animations */
-  @keyframes fadeUp {
-    from {
-      opacity: 0;
-      transform: translateY(20px);
-    }
-    to {
-      opacity: 1;
-      transform: translateY(0);
-    }
-  }
-
-  @keyframes progressBar {
-    from { width: 0; }
-    to { width: 50%; }
-  }
-
-  @keyframes glow {
-    0%, 100% {
-      box-shadow: 0 0 20px rgba(34, 197, 94, 0.4), 0 4px 20px rgba(0, 0, 0, 0.15);
-    }
-    50% {
-      box-shadow: 0 0 30px rgba(34, 197, 94, 0.6), 0 4px 20px rgba(0, 0, 0, 0.15);
-    }
-  }
-
-  @keyframes pulse {
-    0%, 100% { transform: scale(1); }
-    50% { transform: scale(1.05); }
-  }
-
-  @keyframes slideUp {
-    from {
-      transform: translateY(100%);
-      opacity: 0;
-    }
-    to {
-      transform: translateY(0);
-      opacity: 1;
-    }
-  }
-
-  @keyframes fadeIn {
-    from { opacity: 0; }
-    to { opacity: 1; }
-  }
-
-  @keyframes listeningPulse {
-    0%, 100% { opacity: 1; transform: scale(1); }
-    50% { opacity: 0.5; transform: scale(1.2); }
-  }
-
-  /* Top Navbar */
-  .navbar {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    max-width: 430px;
-    margin: 0 auto;
-    background: white;
-    padding: 16px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    z-index: 100;
-    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.04);
-  }
-
-  .hamburger {
-    width: 44px;
-    height: 44px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: 5px;
-    background: none;
-    border: none;
-    cursor: pointer;
-    padding: 8px;
-  }
-
-  .hamburger span {
-    width: 22px;
-    height: 2px;
-    background: #0A1628;
-    border-radius: 2px;
-  }
-
-  .navbar-logo {
-    font-family: 'Instrument Serif', serif;
-    font-size: 24px;
-    color: #22C55E;
-    font-weight: 400;
-  }
-
-  .navbar-spacer {
-    width: 44px;
-  }
-
-  /* Main content */
-  .main-content {
-    padding: 76px 16px 16px;
-  }
-
-  /* Section styles */
-  .section {
-    margin-bottom: 24px;
-    opacity: 0;
-    animation: fadeUp 0.6s ease forwards;
-  }
-
-  .section:nth-child(1) { animation-delay: 0.1s; }
-  .section:nth-child(2) { animation-delay: 0.2s; }
-  .section:nth-child(3) { animation-delay: 0.3s; }
-  .section:nth-child(4) { animation-delay: 0.4s; }
-
-  .section-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-bottom: 16px;
-  }
-
-  .section-title {
-    font-size: 20px;
-    font-weight: 700;
-    color: #0A1628;
-  }
-
-  .section-link {
-    font-size: 14px;
-    font-weight: 600;
-    color: #22C55E;
-    text-decoration: none;
-    cursor: pointer;
-    transition: opacity 0.2s;
-  }
-
-  .section-link:hover {
-    opacity: 0.8;
-  }
-
-  /* Health Talk Feed */
-  .health-talk-grid {
-    display: flex;
-    gap: 12px;
-  }
-
-  .health-talk-card {
-    flex: 1;
-    min-width: 0;
-    width: calc(50% - 6px);
-    background: white;
-    border-radius: 16px;
-    padding: 20px 16px;
-    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
-    text-align: center;
-    transition: all 0.3s ease;
-    opacity: 0;
-    animation: fadeUp 0.6s ease forwards;
-  }
-
-  .health-talk-card:nth-child(1) { animation-delay: 0.2s; }
-  .health-talk-card:nth-child(2) { animation-delay: 0.3s; }
-
-  .health-talk-card:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
-  }
-
-  .doctor-avatar {
-    width: 80px;
-    height: 80px;
-    border-radius: 50%;
-    object-fit: cover;
-    margin: 0 auto 12px;
-    border: 3px solid #DCFCE7;
-  }
-
-  .doctor-name-row {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 6px;
-    margin-bottom: 8px;
-  }
-
-  .doctor-name {
-    font-size: 16px;
-    font-weight: 700;
-    color: #0A1628;
-  }
-
-  .verified-icon {
-    width: 18px;
-    height: 18px;
-    color: #22C55E;
-  }
-
-  .doctor-quote {
-    font-size: 13px;
-    font-style: italic;
-    color: #6B7280;
-    line-height: 1.5;
-    margin-bottom: 16px;
-    min-height: 40px;
-  }
-
-  .btn-read-more {
-    width: 100%;
-    padding: 12px 16px;
-    background: #F0FDF4;
-    color: #22C55E;
-    border: none;
-    border-radius: 12px;
-    font-size: 14px;
-    font-weight: 600;
-    font-family: inherit;
-    cursor: pointer;
-    transition: all 0.2s;
-    min-height: 44px;
-  }
-
-  .btn-read-more:hover {
-    background: #DCFCE7;
-  }
-
-  /* Medications Card */
-  .medication-card {
-    background: white;
-    border-radius: 16px;
-    padding: 20px;
-    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
-  }
-
-  .medication-content {
-    display: flex;
-    align-items: center;
-    gap: 16px;
-    margin-bottom: 16px;
-  }
-
-  .medication-icon {
-    width: 56px;
-    height: 56px;
-    background: #DCFCE7;
-    border-radius: 14px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-shrink: 0;
-  }
-
-  .medication-icon svg {
-    color: #22C55E;
-  }
-
-  .medication-info {
-    flex: 1;
-    min-width: 0;
-  }
-
-  .medication-name {
-    font-size: 17px;
-    font-weight: 700;
-    color: #0A1628;
-    margin-bottom: 4px;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
-
-  .medication-dosage {
-    font-size: 14px;
-    color: #6B7280;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
-
-  .medication-time {
-    text-align: right;
-    flex-shrink: 0;
-  }
-
-  .medication-time-value {
-    font-size: 17px;
-    font-weight: 700;
-    color: #22C55E;
-    margin-bottom: 2px;
-  }
-
-  .medication-time-label {
-    font-size: 12px;
-    color: #6B7280;
-  }
-
-  .progress-bar {
-    height: 6px;
-    background: #E5E7EB;
-    border-radius: 3px;
-    overflow: hidden;
-  }
-
-  .progress-fill {
-    height: 100%;
-    background: #22C55E;
-    border-radius: 3px;
-    animation: progressBar 1s ease 0.5s forwards;
-    width: 0;
-  }
-
-  /* Doctors Card */
-  .doctor-card {
-    background: white;
-    border-radius: 16px;
-    padding: 20px;
-    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
-    display: flex;
-    align-items: center;
-    gap: 16px;
-  }
-
-  .doctor-card-avatar {
-    width: 56px;
-    height: 56px;
-    border-radius: 50%;
-    object-fit: cover;
-    flex-shrink: 0;
-  }
-
-  .doctor-card-info {
-    flex: 1;
-    min-width: 0;
-  }
-
-  .doctor-card-name {
-    font-size: 17px;
-    font-weight: 700;
-    color: #0A1628;
-    margin-bottom: 4px;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
-
-  .doctor-card-specialty {
-    font-size: 14px;
-    color: #6B7280;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
-
-  .btn-consult {
-    padding: 12px 24px;
-    background: #22C55E;
-    color: white;
-    border: none;
-    border-radius: 50px;
-    font-size: 14px;
-    font-weight: 600;
-    font-family: inherit;
-    cursor: pointer;
-    transition: all 0.2s;
-    flex-shrink: 0;
-    min-height: 44px;
-  }
-
-  .btn-consult:hover {
-    transform: scale(1.05);
-    box-shadow: 0 4px 16px rgba(34, 197, 94, 0.3);
-  }
-
-  /* Bottom Navigation */
-  .bottom-nav {
-    position: fixed;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    max-width: 430px;
-    margin: 0 auto;
-    background: white;
-    height: 70px;
-    display: flex;
-    align-items: center;
-    justify-content: space-around;
-    box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.08);
-    z-index: 100;
-  }
-
-  .nav-item {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 4px;
-    background: none;
-    border: none;
-    cursor: pointer;
-    padding: 8px 16px;
-    min-width: 64px;
-    min-height: 44px;
-    color: #6B7280;
-    transition: color 0.2s;
-  }
-
-  .nav-item.active {
-    color: #22C55E;
-  }
-
-  .nav-item svg {
-    width: 24px;
-    height: 24px;
-  }
-
-  .nav-item span {
-    font-size: 11px;
-    font-weight: 500;
-  }
-
-  .ai-nurse-btn {
-    position: relative;
-    margin-top: -32px;
-  }
-
-  .ai-nurse-circle {
-    width: 64px;
-    height: 64px;
-    background: #22C55E;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    box-shadow: 0 4px 20px rgba(34, 197, 94, 0.4);
-    animation: glow 2s ease-in-out infinite;
-    cursor: pointer;
-    border: none;
-    transition: transform 0.2s;
-  }
-
-  .ai-nurse-circle:hover {
-    transform: scale(1.05);
-  }
-
-  .ai-nurse-circle:active {
-    transform: scale(0.95);
-    animation: pulse 0.3s ease;
-  }
-
-  .ai-nurse-circle svg {
-    color: white;
-    width: 28px;
-    height: 28px;
-  }
-
-  .ai-nurse-label {
-    font-size: 11px;
-    font-weight: 700;
-    color: #22C55E;
-    margin-top: 8px;
-    text-align: center;
-  }
-
-  /* AI Nurse Modal */
-  .modal-overlay {
-    position: fixed;
-    inset: 0;
-    background: rgba(0, 0, 0, 0.5);
-    z-index: 200;
-    opacity: 0;
-    animation: fadeIn 0.3s ease forwards;
-  }
-
-  .modal-sheet {
-    position: fixed;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    max-width: 430px;
-    margin: 0 auto;
-    background: white;
-    border-radius: 24px 24px 0 0;
-    z-index: 201;
-    transform: translateY(100%);
-    animation: slideUp 0.4s cubic-bezier(0.32, 0.72, 0, 1) forwards;
-    max-height: 90vh;
-    overflow-y: auto;
-    -webkit-overflow-scrolling: touch;
-  }
-
-  .modal-handle {
-    width: 40px;
-    height: 4px;
-    background: #E5E7EB;
-    border-radius: 2px;
-    margin: 12px auto 0;
-  }
-
-  .modal-content {
-    padding: 24px;
-    text-align: center;
-  }
-
-  .modal-title {
-    font-family: 'Instrument Serif', serif;
-    font-size: 24px;
-    color: #0A1628;
-    margin-bottom: 8px;
-  }
-
-  .modal-subtitle {
-    font-size: 15px;
-    color: #6B7280;
-    margin-bottom: 32px;
-  }
-
-  .mic-button {
-    width: 96px;
-    height: 96px;
-    background: #22C55E;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin: 0 auto 16px;
-    cursor: pointer;
-    border: none;
-    box-shadow: 0 0 30px rgba(34, 197, 94, 0.5);
-    animation: glow 1.5s ease-in-out infinite;
-    transition: transform 0.2s;
-  }
-
-  .mic-button:hover {
-    transform: scale(1.05);
-  }
-
-  .mic-button svg {
-    color: white;
-    width: 40px;
-    height: 40px;
-  }
-
-  .listening-indicator {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-    margin-bottom: 32px;
-  }
-
-  .listening-dot {
-    width: 10px;
-    height: 10px;
-    background: #3B82F6;
-    border-radius: 50%;
-    animation: listeningPulse 1.5s ease-in-out infinite;
-  }
-
-  .listening-text {
-    font-size: 14px;
-    font-weight: 600;
-    color: #3B82F6;
-    letter-spacing: 1px;
-  }
-
-  .symptoms-area {
-    background: #F5F5F5;
-    border-radius: 16px;
-    padding: 20px;
-    margin-bottom: 24px;
-    text-align: left;
-  }
-
-  .symptoms-label {
-    font-size: 11px;
-    font-weight: 600;
-    color: #6B7280;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-    margin-bottom: 12px;
-  }
-
-  .symptom-chips {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
-  }
-
-  .symptom-chip {
-    background: white;
-    padding: 8px 14px;
-    border-radius: 50px;
-    font-size: 13px;
-    color: #0A1628;
-    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
-  }
-
-  .btn-proceed {
-    width: 100%;
-    padding: 18px;
-    background: #0A1628;
-    color: white;
-    border: none;
-    border-radius: 50px;
-    font-size: 16px;
-    font-weight: 600;
-    font-family: inherit;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-    transition: all 0.2s;
-    min-height: 56px;
-    margin-bottom: 16px;
-  }
-
-  .btn-proceed:hover {
-    background: #1a2744;
-    transform: scale(1.02);
-  }
-
-  .modal-note {
-    font-size: 12px;
-    color: #9CA3AF;
-    text-align: center;
-  }
-
-  /* Desktop responsive */
-  @media (min-width: 768px) {
-    .home-page {
-      max-width: 700px;
-      padding-bottom: 100px;
-    }
-
-    .navbar {
-      max-width: 700px;
-    }
-
-    .main-content {
-      padding: 84px 24px 24px;
-    }
-
-    .health-talk-grid {
-      gap: 16px;
-    }
-
-    .health-talk-card {
-      padding: 24px 20px;
-    }
-
-    .bottom-nav {
-      max-width: 700px;
-    }
-
-    .modal-sheet {
-      max-width: 700px;
-    }
-  }
-
-  @media (min-width: 1024px) {
-    .home-page {
-      max-width: 100%;
-      display: block;
-      padding-bottom: 0;
-      background: #F5F5F5;
-    }
-
-    .navbar {
-      display: none;
-    }
-
-    .bottom-nav {
-      display: none;
-    }
-
-    .sidebar {
-      display: flex;
-      flex-direction: column;
-      background: white;
-      padding: 32px 24px;
-      position: fixed;
-      top: 0;
-      left: 0;
-      bottom: 0;
-      width: 240px;
-      box-shadow: 2px 0 16px rgba(0, 0, 0, 0.06);
-      z-index: 100;
-    }
-
-    .sidebar-logo {
-      font-family: 'Instrument Serif', serif;
-      font-size: 28px;
-      color: #22C55E;
-      margin-bottom: 48px;
-      padding-top: 8px;
-    }
-
-    .sidebar-nav {
-      display: flex;
-      flex-direction: column;
-      gap: 6px;
-      flex: 1;
-    }
-
-    .sidebar-item {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      padding: 14px 16px;
-      border-radius: 12px;
-      background: none;
-      border: none;
-      cursor: pointer;
-      font-size: 15px;
-      font-weight: 500;
-      color: #6B7280;
-      font-family: inherit;
-      transition: all 0.2s;
-      text-align: left;
-    }
-
-    .sidebar-item:hover {
-      background: #F5F5F5;
-      color: #0A1628;
-    }
-
-    .sidebar-item.active {
-      background: #F0FDF4;
-      color: #22C55E;
-    }
-
-    .sidebar-item.ai-nurse {
-      background: #22C55E;
-      color: white;
-      margin-top: 24px;
-    }
-
-    .sidebar-item.ai-nurse:hover {
-      background: #16A34A;
-    }
-
-    .main-content {
-      margin-left: 240px;
-      padding: 40px 48px;
-      max-width: calc(100% - 240px);
-      min-height: 100vh;
-      background: #F5F5F5;
-    }
-
-    .section-title {
-      font-size: 22px;
-    }
-
-    .health-talk-grid {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 20px;
-    }
-
-    .health-talk-card {
-      width: 100%;
-    }
-
-    .health-talk-card:nth-child(3) {
-      display: block;
-    }
-    
-    .medication-card, .doctor-card {
-      max-width: 600px;
-    }
-
-    .modal-sheet {
-      max-width: 600px;
-      bottom: auto;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      border-radius: 24px;
-      animation: none;
-      opacity: 0;
-      animation: fadeIn 0.3s ease 0.1s forwards;
-    }
-  }
-
-  /* Hide third card on mobile */
-  @media (max-width: 1023px) {
-    .health-talk-card:nth-child(3) {
-      display: none;
-    }
-
-    .sidebar {
-      display: none;
-    }
-  }
-`
+import { useState, useEffect } from "react";
+import AINurse from "./AiNurse.jsx";
+import "./Home.css";
 
 function Home() {
-  const [showModal, setShowModal] = useState(false)
-  const [activeNav, setActiveNav] = useState('home')
+  const [showModal, setShowModal] = useState(false);
+  const [activeNav, setActiveNav] = useState("home");
 
   useEffect(() => {
     if (showModal) {
-      document.body.style.overflow = 'hidden'
+      document.body.style.overflow = "hidden";
     } else {
-      document.body.style.overflow = ''
+      document.body.style.overflow = "";
     }
     return () => {
-      document.body.style.overflow = ''
-    }
-  }, [showModal])
+      document.body.style.overflow = "";
+    };
+  }, [showModal]);
 
   const handleBackdropClick = (e) => {
     if (e.target === e.currentTarget) {
-      setShowModal(false)
+      setShowModal(false);
     }
-  }
+  };
 
   return (
     <div className="home-page">
-      <style>{css}</style>
-
       {/* Sidebar for desktop */}
       <aside className="sidebar">
         <div className="sidebar-logo">CareLink</div>
         <nav className="sidebar-nav">
           <button className="sidebar-item active">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+            <svg
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+            >
               <path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z" />
               <polyline points="9 22 9 12 15 12 15 22" />
             </svg>
             Home
           </button>
           <button className="sidebar-item">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+            <svg
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+            >
               <path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z" />
             </svg>
             Chats
           </button>
           <button className="sidebar-item">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+            <svg
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+            >
               <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2" />
               <circle cx="12" cy="7" r="4" />
             </svg>
             Profile
           </button>
-          <button className="sidebar-item ai-nurse" onClick={() => setShowModal(true)}>
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+          <button
+            className="sidebar-item ai-nurse"
+            onClick={() => setShowModal(true)}
+          >
+            <svg
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+            >
               <path d="M12 2a3 3 0 00-3 3v7a3 3 0 006 0V5a3 3 0 00-3-3z" />
               <path d="M19 10v2a7 7 0 01-14 0v-2" />
               <line x1="12" y1="19" x2="12" y2="22" />
@@ -914,11 +119,17 @@ function Home() {
               />
               <div className="doctor-name-row">
                 <span className="doctor-name">Dr. Smith</span>
-                <svg className="verified-icon" viewBox="0 0 24 24" fill="currentColor">
+                <svg
+                  className="verified-icon"
+                  viewBox="0 0 24 24"
+                  fill="currentColor"
+                >
                   <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
               </div>
-              <p className="doctor-quote">"Hydration is key to kidney health."</p>
+              <p className="doctor-quote">
+                "Hydration is key to kidney health."
+              </p>
               <button className="btn-read-more">Read more</button>
             </div>
             <div className="health-talk-card">
@@ -929,11 +140,17 @@ function Home() {
               />
               <div className="doctor-name-row">
                 <span className="doctor-name">Dr. Sarah</span>
-                <svg className="verified-icon" viewBox="0 0 24 24" fill="currentColor">
+                <svg
+                  className="verified-icon"
+                  viewBox="0 0 24 24"
+                  fill="currentColor"
+                >
                   <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
               </div>
-              <p className="doctor-quote">"15 min walking reduces daily stress."</p>
+              <p className="doctor-quote">
+                "15 min walking reduces daily stress."
+              </p>
               <button className="btn-read-more">Read more</button>
             </div>
             <div className="health-talk-card">
@@ -944,11 +161,17 @@ function Home() {
               />
               <div className="doctor-name-row">
                 <span className="doctor-name">Dr. Chen</span>
-                <svg className="verified-icon" viewBox="0 0 24 24" fill="currentColor">
+                <svg
+                  className="verified-icon"
+                  viewBox="0 0 24 24"
+                  fill="currentColor"
+                >
                   <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
               </div>
-              <p className="doctor-quote">"Sleep 7-8 hours for heart health."</p>
+              <p className="doctor-quote">
+                "Sleep 7-8 hours for heart health."
+              </p>
               <button className="btn-read-more">Read more</button>
             </div>
           </div>
@@ -963,14 +186,23 @@ function Home() {
           <div className="medication-card">
             <div className="medication-content">
               <div className="medication-icon">
-                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <svg
+                  width="28"
+                  height="28"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                >
                   <path d="M10.5 20.5L3.5 13.5C1.5 11.5 1.5 8 3.5 6C5.5 4 9 4 11 6L18 13C20 15 20 18.5 18 20.5C16 22.5 12.5 22.5 10.5 20.5Z" />
                   <path d="M7 10l7 7" />
                 </svg>
               </div>
               <div className="medication-info">
                 <div className="medication-name">Lisinopril</div>
-                <div className="medication-dosage">10mg • Daily after breakfast</div>
+                <div className="medication-dosage">
+                  10mg • Daily after breakfast
+                </div>
               </div>
               <div className="medication-time">
                 <div className="medication-time-value">08:00 AM</div>
@@ -997,7 +229,9 @@ function Home() {
             />
             <div className="doctor-card-info">
               <div className="doctor-card-name">Dr. Robert Chen</div>
-              <div className="doctor-card-specialty">Cardiologist • City Hospital</div>
+              <div className="doctor-card-specialty">
+                Cardiologist • City Hospital
+              </div>
             </div>
             <button className="btn-consult">Consult</button>
           </div>
@@ -1006,15 +240,31 @@ function Home() {
 
       {/* Bottom Navigation (mobile) */}
       <nav className="bottom-nav">
-        <button className={`nav-item ${activeNav === 'chats' ? 'active' : ''}`} onClick={() => setActiveNav('chats')}>
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+        <button
+          className={`nav-item ${activeNav === "chats" ? "active" : ""}`}
+          onClick={() => setActiveNav("chats")}
+        >
+          <svg
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+          >
             <path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z" />
           </svg>
           <span>Chats</span>
         </button>
         <div className="ai-nurse-btn">
-          <button className="ai-nurse-circle" onClick={() => setShowModal(true)}>
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+          <button
+            className="ai-nurse-circle"
+            onClick={() => setShowModal(true)}
+          >
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+            >
               <path d="M12 2a3 3 0 00-3 3v7a3 3 0 006 0V5a3 3 0 00-3-3z" />
               <path d="M19 10v2a7 7 0 01-14 0v-2" />
               <line x1="12" y1="19" x2="12" y2="22" />
@@ -1022,8 +272,16 @@ function Home() {
           </button>
           <div className="ai-nurse-label">AI NURSE</div>
         </div>
-        <button className={`nav-item ${activeNav === 'profile' ? 'active' : ''}`} onClick={() => setActiveNav('profile')}>
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+        <button
+          className={`nav-item ${activeNav === "profile" ? "active" : ""}`}
+          onClick={() => setActiveNav("profile")}
+        >
+          <svg
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+          >
             <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2" />
             <circle cx="12" cy="7" r="4" />
           </svg>
@@ -1036,13 +294,13 @@ function Home() {
         <AINurse
           onClose={() => setShowModal(false)}
           onProceed={(result) => {
-            setShowModal(false)
-            onProceedToDoctor?.(result)
+            setShowModal(false);
+            onProceedToDoctor?.(result);
           }}
         />
       )}
     </div>
-  )
+  );
 }
 
-export default Home
+export default Home;

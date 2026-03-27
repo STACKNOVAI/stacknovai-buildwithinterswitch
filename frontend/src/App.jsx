@@ -1,62 +1,85 @@
-import { useState, useEffect } from 'react'
-import LandingPage from './pages/LandingPage.jsx'
-import Login from './pages/Login.jsx'
-import Signup from './pages/Signup.jsx'
-import Home from './pages/Home.jsx'
-import FindDoctor from './pages/FindDoctor.jsx'
+import { useState } from "react";
+import {
+  BrowserRouter as Router,
+  Routes,
+  Route,
+  Navigate,
+} from "react-router-dom";
+import LandingPage from "./pages/LandingPage.jsx";
+import Login from "./pages/Login.jsx";
+import Signup from "./pages/Signup.jsx";
+import Home from "./pages/Home.jsx";
+import FindDoctor from "./pages/FindDoctor.jsx";
+
+// 1. The Protected Route Component
+const ProtectedRoute = ({ children }) => {
+  const token = localStorage.getItem("token");
+
+  if (!token) {
+    // No token found, redirect to login
+    return <Navigate to="/login" replace />;
+  }
+
+  return children;
+};
 
 function App() {
-  const [currentPage, setCurrentPage] = useState('landing')
-  const [aiResult, setAiResult] = useState(null)
+  const [aiResult, setAiResult] = useState(null);
 
-  useEffect(() => {
-    const handleHashChange = () => {
-      const hash = window.location.hash.slice(1) || 'landing'
-      setCurrentPage(hash)
-    }
-    handleHashChange()
-    window.addEventListener('hashchange', handleHashChange)
-    return () => window.removeEventListener('hashchange', handleHashChange)
-  }, [])
+  const handleProceedToDoctor = (result, navigate) => {
+    setAiResult(result);
+    navigate("/find-doctor");
+  };
 
-  const navigate = (page) => {
-    setCurrentPage(page)
-    window.location.hash = page
-  }
+  return (
+    <Router>
+      <Routes>
+        {/* Public Routes */}
+        <Route path="/" element={<LandingPage />} />
+        <Route path="/login" element={<Login />} />
+        <Route path="/signup" element={<Signup />} />
 
-  const handleProceedToDoctor = (result) => {
-    setAiResult(result)
-    setCurrentPage('find-doctor')
-    window.location.hash = 'find-doctor'
-  }
+        {/* Protected Routes - Wrap these in ProtectedRoute */}
+        <Route
+          path="/dashboard"
+          element={
+            <ProtectedRoute>
+              <Home onProceedToDoctor={handleProceedToDoctor} />
+            </ProtectedRoute>
+          }
+        />
 
-  const renderPage = () => {
-    switch (currentPage) {
-      case 'login':
-        return <Login />
-      case 'signup':
-        return <Signup />
-      case 'dashboard':
-        return (
-          <Home onProceedToDoctor={handleProceedToDoctor} />
-        )
-      case 'find-doctor':
-        return (
-          <FindDoctor
-            aiResult={aiResult}
-            onBack={() => navigate('dashboard')}
-            onConsult={(doctor, result) => {
-              console.log("Starting consult with:", doctor, result)
-              // navigate to consultation page next
-            }}
-          />
-        )
-      default:
-        return <LandingPage />
-    }
-  }
+        <Route
+          path="/find-doctor"
+          element={
+            <ProtectedRoute>
+              <FindDoctor
+                aiResult={aiResult}
+                onConsult={(doctor, result) => {
+                  console.log("Starting consult with:", doctor, result);
+                }}
+              />
+            </ProtectedRoute>
+          }
+        />
 
-  return renderPage()
+        {/* The 404 Catch-All Route */}
+        <Route path="*" element={<NotFound />} />
+      </Routes>
+    </Router>
+  );
 }
 
-export default App
+function NotFound() {
+  return (
+    <div style={{ textAlign: "center", padding: "100px 20px" }}>
+      <h1>404 - Page Not Found</h1>
+      <p>Oops! The page you are looking for doesn't exist.</p>
+      <a href="/" style={{ color: "#007bff", textDecoration: "none" }}>
+        Return to Home
+      </a>
+    </div>
+  );
+}
+
+export default App;
