@@ -4,6 +4,8 @@ import {
   Routes,
   Route,
   Navigate,
+  useNavigate,
+  useLocation,
 } from "react-router-dom";
 import LandingPage from "./pages/LandingPage.jsx";
 import Login from "./pages/Login.jsx";
@@ -15,6 +17,7 @@ import Conversations from "./pages/Conversations.jsx";
 import Medications from "./pages/Medications.jsx";
 import Doctors from "./pages/Doctors.jsx";
 import Bookings from "./pages/Bookings.jsx";
+import Payment from "./pages/payment.jsx";
 
 // Protected Route Component
 const ProtectedRoute = ({ children }) => {
@@ -23,8 +26,37 @@ const ProtectedRoute = ({ children }) => {
   return children;
 };
 
+// FindDoctor Wrapper with useNavigate hook
+function FindDoctorWithNav({ aiResult }) {
+  const navigate = useNavigate();
+
+  const handleConsult = (doctor, result) => {
+    navigate("/payment", {
+      state: {
+        pendingConsultation: {
+          doctor,
+          aiResult: result,
+          amount: parseFloat(doctor.price.replace(/[^\d]/g, "")),
+          type: "consultation"
+        }
+      }
+    });
+  };
+
+  return <FindDoctor aiResult={aiResult} onConsult={handleConsult} />;
+}
+
+// Payment Wrapper with useLocation hook to get state
+function PaymentWithNav() {
+  const location = useLocation();
+  const state = location?.state;
+  
+  return <Payment pendingConsultation={state?.pendingConsultation} />;
+}
+
 function App() {
   const [aiResult, setAiResult] = useState(null);
+  const [pendingConsultation, setPendingConsultation] = useState(null);
 
   const handleProceedToDoctor = (result, navigate) => {
     setAiResult(result);
@@ -53,12 +85,7 @@ function App() {
           path="/find-doctor"
           element={
             <ProtectedRoute>
-              <FindDoctor
-                aiResult={aiResult}
-                onConsult={(doctor, result) => {
-                  console.log("Starting consult with:", doctor, result);
-                }}
-              />
+              <FindDoctorWithNav aiResult={aiResult} />
             </ProtectedRoute>
           }
         />
@@ -104,6 +131,15 @@ function App() {
           element={
             <ProtectedRoute>
               <ProfilePage />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/payment"
+          element={
+            <ProtectedRoute>
+              <PaymentWithNav />
             </ProtectedRoute>
           }
         />
