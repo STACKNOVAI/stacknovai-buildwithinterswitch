@@ -176,7 +176,7 @@ Success → Start consultation with doctor
 
 ## ✅ Deployment
 
-**Frontend**: Deployed on [Vercel](https://carelink-ruddy.vercel.app/)  
+**Frontend**: Deployed on [Vercel](https://carelink-ai-omega.vercel.app/)  
 **Backend**: Deployed on Render (https://carelink-5qts.onrender.com)
 
 ---
